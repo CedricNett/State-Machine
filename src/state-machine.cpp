@@ -1,6 +1,9 @@
 #include <iostream>
 #include <string>
 
+#define RESET   "\033[0m"		
+#define RED     "\033[31m"
+
 namespace local
 {
 	struct stateEngine_T
@@ -13,9 +16,8 @@ namespace local
 			idle_S,
 			state1_S,
 			state2_S,
-
-			state3_S,	//Neuer State
-
+			state3_S,	//Neu
+			state4_S,	//Neu
 			exit_S
 		};
 		state_T nextState_;
@@ -23,7 +25,7 @@ namespace local
 		// Diese privaten Funktionen würden kapseln, was zu den Transitionen
 		// erfüllt sein müsste.
 		bool checkForProblems(int Ergebnis)		
-		{ 	/*Auswertung*/ 
+		{
 			if(Ergebnis==0)
 			{
 				return true;
@@ -36,8 +38,9 @@ namespace local
 		};
 
 		bool hasProcessFinished(int Ergebnis)	
-		{ 	/*Auswertung*/ 
-			if(Ergebnis!=0)
+		{
+			//if(Ergebnis!=0)
+			if(Ergebnis=Ergebnis)
 			{
 				return true;
 			}
@@ -49,7 +52,7 @@ namespace local
 			
 
 		bool evaluateTransitionGuard1(int Auswahl)	
-		{	/*Auswertung*/
+		{
 			if(Auswahl == 1)
 			{
 				return true;
@@ -61,7 +64,7 @@ namespace local
 		}
 		
 		bool evaluateTransitionGuard2(int Auswahl)
-		{	/*Auswertung*/
+		{
 			if(Auswahl == 2)
 			{
 				return true;
@@ -73,7 +76,7 @@ namespace local
 		}
 
 		bool evaluateTransitionGuard3(int Auswahl)
-		{	/*Auswertung*/
+		{
 			if(Auswahl == 3)
 			{
 				return true;
@@ -84,7 +87,17 @@ namespace local
 			};
 		}
 
-
+		bool evaluateTransitionGuard4(int Auswahl)
+		{
+			if(Auswahl == 4)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			};
+		}
 
 		// Die State-Funktionen führen aus, was in dem jewiligen State passieren
 		// soll. Der return-Wert ist der jeweilige nächste Zustand in den die 
@@ -112,7 +125,7 @@ namespace local
 
 				summe=zahl1+zahl2;
 				
-				std::cout << "Ergebnis = " << summe << std::endl;
+				std::cout << RED <<"Ergebnis = " << summe << RESET << std::endl;
 
 				if(checkForProblems(summe)) return panic_S;
 				if(hasProcessFinished(summe)) return idle_S;
@@ -129,7 +142,8 @@ namespace local
 				
 				differenz=zahl1-zahl2;
 
-				std::cout << "Ergebnis = " << differenz << std::endl;
+				std::cout << RED <<"Ergebnis = " << differenz << RESET << std::endl;
+
 				// Funktionskörper des anderen Zustands
 				if(checkForProblems(differenz)) return panic_S;
 				if(hasProcessFinished(differenz)) return idle_S;
@@ -146,10 +160,29 @@ namespace local
 				
 				produkt=zahl1*zahl2;
 
-				std::cout << "Ergebnis=" << produkt << std::endl;
-				// Neuer Zustand
+				std::cout << RED <<"Ergebnis = " << produkt << RESET << std::endl;
+
+
 				if(checkForProblems(produkt)) return panic_S;
 				if(hasProcessFinished(produkt)) return idle_S;
+			}	
+		}
+
+		state_T runState4(){
+			while(true){
+				int zahl1=0, zahl2=0;
+				float quotienten =0;
+
+				std::cout << "Geben Sie 2 Zahlen zur division ein:" << std::endl;
+				std::cin >> zahl1;
+				std::cin >> zahl2;
+				
+				quotienten=zahl1/zahl2;
+
+				std::cout << RED <<"Ergebnis = " << quotienten << RESET << std::endl;
+
+				if(checkForProblems(quotienten)) return panic_S;
+				if(hasProcessFinished(quotienten)) return idle_S;
 			}	
 		}
 
@@ -160,7 +193,8 @@ namespace local
 				std::cout << "(1) Addition" << "\n";
 				std::cout << "(2) Subtraktion" << "\n";
 				std::cout << "(3) Multiplikation" << "\n";
-				std::cout << "(4) Programm beenden" << std::endl;
+				std::cout << "(4) Division" << "\n";
+				std::cout << "(0) Programm beenden" << std::endl;
 
 				std::cin >> Auswahl;
 
@@ -168,7 +202,8 @@ namespace local
 				if(evaluateTransitionGuard1(Auswahl)) return state1_S;
 				if(evaluateTransitionGuard2(Auswahl)) return state2_S;
 				if(evaluateTransitionGuard3(Auswahl)) return state3_S;
-				if(Auswahl==4) return exit_S;
+				if(evaluateTransitionGuard4(Auswahl)) return state4_S;
+				if(Auswahl==0) return exit_S;
 			}
 		}
 
@@ -196,12 +231,15 @@ namespace local
 					case state3_S:	//Neu
 						nextState_ = runState3();
 						break;
+					case state4_S:	//Neu
+						nextState_ = runState4();
+						break;
 				}
 			}
 			// Wenn der Exit State erreicht wird, ist etwas schief gelaufen
 			// Daher returnt die .exec Funktion eine 1 welche dann von main
 			// an den Aufrufenden weitergegeben wird
-			std::cout << "State-Machine beendet" << "\n";
+			std::cout << RED << "State-Machine beendet\n" << RESET << std::endl;
 			return 1;
 		}
 
@@ -211,7 +249,6 @@ namespace local
 		}
 	};
 }
-
 
 int main(int argc, char** argv){
 	// Zunächste wird die Statemachine im Speicher angelegt
